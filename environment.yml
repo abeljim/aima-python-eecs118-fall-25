@@ -1,0 +1,23 @@
+name: aima-python
+channels:
+  - defaults
+dependencies:
+  - python=3.9
+  - numpy
+  - matplotlib
+  - pandas
+  - scipy
+  - jupyter
+  - ipython
+  - pytest
+  - pillow
+  - pip
+  - pip:
+    - networkx
+    - opencv-python
+    - ipythonblocks
+    - sortedcontainers
+    - qpsolvers
+    - cvxopt
+    - keras
+    - tensorflow

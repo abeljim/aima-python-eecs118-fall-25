@@ -40,15 +40,20 @@ Features from Python 3.6 and 3.7 that we will be using for this version of the c
 
 ## Installation Guide
 
+First, make sure you have Python 3.7+ and conda installed:
+- [Install Python](https://www.python.org/downloads)
+- [Install conda](https://www.anaconda.com/docs/getting-started/miniconda/install) (Miniconda recommended)
+
 To download the repository:
 
-`git clone https://github.com/aimacode/aima-python.git`
+`git clone https://github.com/abeljim/aima-python-eecs118-fall-25.git`
 
-Then you need to install the basic dependencies to run the project on your system:
+Then you need to create a conda environment and install the dependencies:
 
 ```
-cd aima-python
-pip install -r requirements.txt
+cd aima-python-eecs118-fall-25
+conda env create -f environment.yml
+conda activate aima-python
 ```
 
 You also need to fetch the datasets from the [`aima-data`](https://github.com/aimacode/aima-data) repository:
@@ -58,11 +63,7 @@ git submodule init
 git submodule update
 ```
 
-Wait for the datasets to download, it may take a while. Once they are downloaded, you need to install `pytest`, so that you can run the test suite:
-
-`pip install pytest`
-
-Then to run the tests:
+Wait for the datasets to download, it may take a while. Then to run the tests:
 
 `py.test`
 
