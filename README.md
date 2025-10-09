@@ -58,7 +58,15 @@ Python installation and libararies we be handled by conda. Conda allows for the 
 
 #### Windows
 - To access conda from anywhere you can add it to your path but this might cause collisions with other python installations. Alternativelly you can open anadconda prompt powershell instead from the start menu.
-- If you have a space in your windows username this can cause issue will installation. Instead use WSL or change your username. 
+- If you have a space in your windows username this can cause issue will installation. Instead use WSL or change your username.
+
+##### Removing Conda from PATH (Windows)
+If you later need to remove conda from your PATH:
+1. Open System Properties → Advanced → Environment Variables
+2. In "User variables" or "System variables", find and select the "Path" variable
+3. Click "Edit" → Remove all entries containing conda/miniconda/anaconda paths (there may be multiple entries)
+4. Click "OK" to save changes
+5. Restart your command prompt/PowerShell for changes to take effect 
 
 ### Setting up Enviroment and Testing
 To download the repository:

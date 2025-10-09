@@ -1,7 +1,7 @@
 # Week 2 Lab Plan: Setting Up AIMA Python Environment and Agent Testing
 
 ## Overview
-This lab session will guide students through setting up the AIMA Python environment and working with intelligent agents using the provided `agents.ipynb` notebook. Students will learn to run agent simulations and make modifications to understand how agents interact with their environments.
+This lab session will guide students through setting up the AIMA Python environment and working with intelligent agents using the provided `modelling_cs118.ipynb` notebook. Students will learn to run agent simulations and make modifications to understand how agents interact with their environments.
 
 ## Learning Objectives
 By the end of this lab, students will be able to:
@@ -18,26 +18,67 @@ By the end of this lab, students will be able to:
 
 ## Lab Setup Instructions
 
-### 1. Environment Setup (15 minutes)
+### 1. Environment Setup (20 minutes)
 
-#### Step 1: Install Conda/Miniconda
-If students don't have conda installed:
-- Download Miniconda from https://docs.conda.io/en/latest/miniconda.html
-- Follow installation instructions for their operating system
+#### Step 1: Install Git
+Ensure Git is installed on your system:
 
-#### Step 2: Clone the Repository
+**Windows**: Download and install from [git-scm.com](https://git-scm.com/download/win). Use the defaults for everything you are not sure about. If a beginner I recommend using the Github Desktop GUI for a simpler experience.
+
+**Linux (Debian/Ubuntu)**:
 ```bash
-git clone https://github.com/your-repo/aima-python-eecs118-fall-25.git
+sudo apt update && sudo apt install git
+```
+
+**MacOS**:
+```bash
+brew install git # Requires Homebrew: https://brew.sh/
+```
+
+#### Step 2: Install Conda/Miniconda
+Python installation and libraries will be handled by conda. Conda allows for the dependencies to be handled automatically.
+- [Install conda](https://www.anaconda.com/docs/getting-started/miniconda/install) (Miniconda recommended)
+
+**Windows Notes**:
+- To access conda from anywhere you can add it to your path but this might cause collisions with other python installations. Alternatively you can open anaconda prompt powershell instead from the start menu.
+- If you have a space in your windows username this can cause issues with installation. Instead use WSL or change your username.
+
+#### Step 3: Clone the Repository
+
+**Using Git (CLI)**:
+```bash
+git clone https://github.com/abeljim/aima-python-eecs118-fall-25.git
 cd aima-python-eecs118-fall-25
 ```
 
-#### Step 3: Create and Activate Conda Environment
+**Using GitHub Desktop (Beginner Friendly)**:
+- Open https://github.com/abeljim/aima-python-eecs118-fall-25 in your browser
+- Click the green "Code" button
+- Select "Open with GitHub Desktop"
+- Choose a local path to clone the repo
+- Click "Clone" — the repository will be downloaded to your machine
+
+#### Step 4: Create and Activate Conda Environment
 ```bash
 conda env create -f environment.yml
 conda activate aima-python
 ```
 
-#### Step 4: Launch Jupyter Notebook
+#### Step 5: Fetch Datasets
+You also need to fetch the datasets from the aima-data repository:
+```bash
+git submodule init
+git submodule update
+```
+Wait for the datasets to download, it may take a while.
+
+#### Step 6: Test Installation
+Run the tests to ensure everything is working:
+```bash
+py.test
+```
+
+#### Step 7: Launch Jupyter Notebook
 ```bash
 jupyter notebook
 ```
