@@ -40,13 +40,38 @@ Features from Python 3.6 and 3.7 that we will be using for this version of the c
 
 ## Installation Guide
 
-First, make sure you have Python 3.7+ and conda installed:
-- [Install Python](https://www.python.org/downloads)
+### Git Installation
+
+- **Windows**: Download and install from [git-scm.com](https://git-scm.com/download/win). Use the defaults for everything you are not sure about. If a beginner I recommend using the Github Desktop GUI for a simpler experience. 
+- **Linux (Debian/Ubuntu)**:  
+  ```bash
+  sudo apt update && sudo apt install git
+  ```
+- **MacOS**:
+ ```
+  brew install git # Requires Homebrew: https://brew.sh/
+ ```
+
+### Conda Installation
+Python installation and libararies we be handled by conda. Conda allows for the dependencies to be handled automatically.
 - [Install conda](https://www.anaconda.com/docs/getting-started/miniconda/install) (Miniconda recommended)
 
-To download the repository:
+#### Windows
+- To access conda from anywhere you can add it to your path but this might cause collisions with other python installations. Alternativelly you can open anadconda prompt powershell instead from the start menu.
+- If you have a space in your windows username this can cause issue will installation. Instead use WSL or change your username. 
 
-`git clone https://github.com/abeljim/aima-python-eecs118-fall-25.git`
+### Setting up Enviroment and Testing
+To download the repository:
+#### Using Git (CLI):
+```git clone https://github.com/abeljim/aima-python-eecs118-fall-25.git```
+
+### Using GitHub Desktop (Beginner Friendly):
+- Open https://github.com/abeljim/aima-python-eecs118-fall-25 in your browser
+- Click the green "Code" button
+- Select "Open with GitHub Desktop"
+- Choose a local path to clone the repo
+- Click "Clone" — the repository will be downloaded to your machine
+
 
 Then you need to create a conda environment and install the dependencies:
 
