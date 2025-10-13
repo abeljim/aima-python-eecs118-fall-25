@@ -296,6 +296,7 @@ class Environment:
     def __init__(self):
         self.things = []
         self.agents = []
+        self.num_steps = 0
 
     def thing_classes(self):
         return []  # List of classes that can go into environment
@@ -335,11 +336,13 @@ class Environment:
             for (agent, action) in zip(self.agents, actions):
                 self.execute_action(agent, action)
             self.exogenous_change()
+            self.num_steps += 1
 
     def run(self, steps=1000):
         """Run the Environment for given number of time steps."""
         for step in range(steps):
             if self.is_done():
+                print("Stopping after {} total environment steps.".format(self.num_steps))
                 return
             self.step()
 
@@ -480,7 +483,7 @@ class XYEnvironment(Environment):
         self.observers = []
         # Sets iteration start and end (no walls).
         self.x_start, self.y_start = (0, 0)
-        self.x_end, self.y_end = (self.width, self.height)
+        self.x_end, self.y_end = (self.width - 1, self.height - 1)
 
     perceptible_distance = 1
 
@@ -663,6 +666,7 @@ class GraphicEnvironment(XYEnvironment):
         for step in range(steps):
             self.update(delay)
             if self.is_done():
+                print("Stopping after {} total environment steps.".format(self.num_steps))
                 break
             self.step()
         self.update(delay)
