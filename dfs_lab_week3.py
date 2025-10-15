@@ -1,18 +1,22 @@
 import pygame
 import random
 import time
+from maze_search_week3 import get_neighbors, random_move, dfs
 
 # --- CONFIG ---
 WIDTH, HEIGHT = 600, 600
 ROWS, COLS = 20, 20
 CELL_SIZE = WIDTH // COLS
 
+# Maze-specific sizes
+MAZE_SIZES = [(10, 10), (15, 15), (20, 20)]  # (rows, cols) for Easy, Medium, Hard
+
 START = (0, 0)
 GOAL = (COLS - 1, ROWS - 1)
 
 # --- MAZE SEEDS ---
-MAZE_SEEDS = [42, 123, 456]  # Seeds for reproducible mazes
-MAZE_DENSITIES = [0.15, 0.25, 0.35]  # Wall density for each difficulty
+MAZE_SEEDS = [42, 789, 456]  # Seeds for reproducible mazes
+MAZE_DENSITIES = [0.15, 0.20, 0.35]  # Wall density for each difficulty
 MAZE_NAMES = ["Easy", "Medium", "Hard"]
 
 # Colors
@@ -34,53 +38,64 @@ clock = pygame.time.Clock()
 # Load agent image
 try:
     agent_image = pygame.image.load("peter.jpeg")
-    agent_image = pygame.transform.scale(agent_image, (CELL_SIZE, CELL_SIZE))
 except:
     agent_image = None  # Fallback to circle if image not found
 
 
-def generate_walls(seed, density):
+def generate_walls(seed, density, rows, cols):
     """Generate wall positions with a specific seed for reproducibility."""
     random.seed(seed)
     walls = set()
-    for x in range(COLS):
-        for y in range(ROWS):
+    for x in range(cols):
+        for y in range(rows):
             if random.random() < density:
                 walls.add((x, y))
     # Ensure start and goal are clear
     walls.discard(START)
-    walls.discard(GOAL)
+    goal = (cols - 1, rows - 1)
+    walls.discard(goal)
     return walls
 
 
-def draw_grid():
-    for x in range(0, WIDTH, CELL_SIZE):
-        pygame.draw.line(screen, GRAY, (x, 0), (x, HEIGHT))
-    for y in range(0, HEIGHT, CELL_SIZE):
-        pygame.draw.line(screen, GRAY, (0, y), (WIDTH, y))
+def draw_grid(rows, cols):
+    cell_width = WIDTH // cols
+    cell_height = HEIGHT // rows
+    for x in range(0, cols * cell_width + 1, cell_width):
+        pygame.draw.line(screen, GRAY, (x, 0), (x, rows * cell_height))
+    for y in range(0, rows * cell_height + 1, cell_height):
+        pygame.draw.line(screen, GRAY, (0, y), (cols * cell_width, y))
 
 
-def draw_cell(pos, color):
+def draw_cell(pos, color, rows, cols):
     x, y = pos
-    pygame.draw.rect(screen, color, (x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+    cell_width = WIDTH // cols
+    cell_height = HEIGHT // rows
+    pygame.draw.rect(screen, color, (x * cell_width, y * cell_height, cell_width, cell_height))
 
 
-def draw_agent(pos):
+def draw_agent(pos, rows, cols):
     x, y = pos
+    cell_width = WIDTH // cols
+    cell_height = HEIGHT // rows
     if agent_image:
-        screen.blit(agent_image, (x * CELL_SIZE, y * CELL_SIZE))
+        scaled_image = pygame.transform.scale(agent_image, (cell_width, cell_height))
+        screen.blit(scaled_image, (x * cell_width, y * cell_height))
     else:
         # Fallback to circle if image not loaded
-        center = (x * CELL_SIZE + CELL_SIZE // 2, y * CELL_SIZE + CELL_SIZE // 2)
-        pygame.draw.circle(screen, GREEN, center, CELL_SIZE // 3)
+        center = (x * cell_width + cell_width // 2, y * cell_height + cell_height // 2)
+        pygame.draw.circle(screen, GREEN, center, min(cell_width, cell_height) // 3)
 
 
-def draw_timer(start_time, finished):
-    elapsed = time.time() - start_time
+def draw_timer(start_time, elapsed_time, started, paused, finished):
     if finished:
-        label = font.render(f"Finished in {elapsed:.2f}s", True, RED)
+        label = font.render(f"Finished in {elapsed_time:.2f}s", True, RED)
+    elif started and not paused:
+        current_elapsed = elapsed_time + (time.time() - start_time)
+        label = font.render(f"Time: {current_elapsed:.2f}s", True, BLACK)
+    elif paused:
+        label = font.render(f"Time: {elapsed_time:.2f}s (PAUSED)", True, BLACK)
     else:
-        label = font.render(f"Time: {elapsed:.2f}s", True, BLACK)
+        label = font.render(f"Time: 0.00s", True, BLACK)
     screen.blit(label, (10, HEIGHT + 10))
 
 
@@ -89,37 +104,33 @@ def draw_steps(steps):
     screen.blit(label, (10, HEIGHT + 40))
 
 
-def draw_maze_info(maze_num):
-    label = small_font.render(f"Maze: {MAZE_NAMES[maze_num]} (Press 1/2/3 to switch)", True, BLACK)
+def draw_maze_info(maze_num, started, paused, finished):
+    info_text = f"Maze: {MAZE_NAMES[maze_num]} (Press 1/2/3 to switch)"
+    if not started:
+        info_text += " | Press SPACE to start"
+    elif paused:
+        info_text += " | Press SPACE to resume"
+    elif finished:
+        info_text += " | Press SPACE to restart"
+    else:
+        info_text += " | Press SPACE to pause"
+    label = small_font.render(info_text, True, BLACK)
     screen.blit(label, (10, HEIGHT + 70))
-
-
-def get_neighbors(pos, walls):
-    x, y = pos
-    moves = [(1, 0), (-1, 0), (0, 1), (0, -1)]
-    valid = [
-        (x + dx, y + dy)
-        for dx, dy in moves
-        if 0 <= x + dx < COLS and 0 <= y + dy < ROWS and (x + dx, y + dy) not in walls
-    ]
-    return valid
-
-
-def random_move(pos, walls):
-    neighbors = get_neighbors(pos, walls)
-    if neighbors:
-        return random.choice(neighbors)
-    return pos
 
 
 def main():
     running = True
+    started = False
+    paused = False
     finished = False
     agent_pos = START
     visited = set()
     current_maze = 0  # Start with first maze (Easy)
-    walls = generate_walls(MAZE_SEEDS[current_maze], MAZE_DENSITIES[current_maze])
-    start_time = time.time()
+    current_rows, current_cols = MAZE_SIZES[current_maze]
+    current_goal = (current_cols - 1, current_rows - 1)
+    walls = generate_walls(MAZE_SEEDS[current_maze], MAZE_DENSITIES[current_maze], current_rows, current_cols)
+    start_time = 0
+    elapsed_time = 0
     steps = 0
 
     while running:
@@ -129,65 +140,103 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
+                # Start/restart/pause with SPACE
+                if event.key == pygame.K_SPACE:
+                    if not started or finished:
+                        # Start or restart
+                        started = True
+                        paused = False
+                        finished = False
+                        agent_pos = START
+                        visited = set()
+                        start_time = time.time()
+                        elapsed_time = 0
+                        steps = 0
+                    elif started and not finished:
+                        # Toggle pause
+                        paused = not paused
+                        if paused:
+                            # Store elapsed time when pausing
+                            elapsed_time += time.time() - start_time
+                        else:
+                            # Reset start time when resuming
+                            start_time = time.time()
                 # Switch mazes with number keys
-                if event.key == pygame.K_1:
+                elif event.key == pygame.K_1:
                     current_maze = 0
                     agent_pos = START
                     visited = set()
-                    walls = generate_walls(MAZE_SEEDS[current_maze], MAZE_DENSITIES[current_maze])
-                    start_time = time.time()
+                    current_rows, current_cols = MAZE_SIZES[current_maze]
+                    current_goal = (current_cols - 1, current_rows - 1)
+                    walls = generate_walls(MAZE_SEEDS[current_maze], MAZE_DENSITIES[current_maze], current_rows, current_cols)
+                    start_time = 0
+                    elapsed_time = 0
                     steps = 0
                     finished = False
+                    started = False
+                    paused = False
                 elif event.key == pygame.K_2:
                     current_maze = 1
                     agent_pos = START
                     visited = set()
-                    walls = generate_walls(MAZE_SEEDS[current_maze], MAZE_DENSITIES[current_maze])
-                    start_time = time.time()
+                    current_rows, current_cols = MAZE_SIZES[current_maze]
+                    current_goal = (current_cols - 1, current_rows - 1)
+                    walls = generate_walls(MAZE_SEEDS[current_maze], MAZE_DENSITIES[current_maze], current_rows, current_cols)
+                    start_time = 0
+                    elapsed_time = 0
                     steps = 0
                     finished = False
+                    started = False
+                    paused = False
                 elif event.key == pygame.K_3:
                     current_maze = 2
                     agent_pos = START
                     visited = set()
-                    walls = generate_walls(MAZE_SEEDS[current_maze], MAZE_DENSITIES[current_maze])
-                    start_time = time.time()
+                    current_rows, current_cols = MAZE_SIZES[current_maze]
+                    current_goal = (current_cols - 1, current_rows - 1)
+                    walls = generate_walls(MAZE_SEEDS[current_maze], MAZE_DENSITIES[current_maze], current_rows, current_cols)
+                    start_time = 0
+                    elapsed_time = 0
                     steps = 0
                     finished = False
+                    started = False
+                    paused = False
 
-        if not finished:
-            next_pos = random_move(agent_pos, walls)
+        if started and not paused and not finished:
+            next_pos = random_move(agent_pos, walls, current_rows, current_cols)
             visited.add(agent_pos)
             if next_pos != agent_pos:  # Only count as a step if agent moved
                 steps += 1
             agent_pos = next_pos
 
-            if agent_pos == GOAL:
+            if agent_pos == current_goal:
                 finished = True
+                # Store final elapsed time
+                elapsed_time += time.time() - start_time
 
         # --- Draw ---
         screen.fill(WHITE)
-        draw_grid()
+        draw_grid(current_rows, current_cols)
 
         # Draw visited cells
         for pos in visited:
-            draw_cell(pos, BLUE)
+            draw_cell(pos, BLUE, current_rows, current_cols)
 
         # Draw walls
         for w in walls:
-            draw_cell(w, BLACK)
+            draw_cell(w, BLACK, current_rows, current_cols)
 
         # Draw start and goal
-        draw_cell(START, YELLOW)
-        draw_cell(GOAL, RED)
+        draw_cell(START, YELLOW, current_rows, current_cols)
+        draw_cell(current_goal, RED, current_rows, current_cols)
 
         # Draw agent
-        draw_agent(agent_pos)
+        draw_agent(agent_pos, current_rows, current_cols)
 
         # Draw timer and steps
-        draw_timer(start_time, finished)
+        draw_timer(start_time, elapsed_time, started, paused, finished)
         draw_steps(steps)
-        draw_maze_info(current_maze)
+        draw_maze_info(current_maze, started, paused, finished)
 
         pygame.display.flip()
 
