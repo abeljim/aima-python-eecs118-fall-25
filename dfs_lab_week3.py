@@ -133,6 +133,11 @@ def main():
     elapsed_time = 0
     steps = 0
 
+    # Run DFS to get the path and visited order
+    path, visited_order = dfs(START, current_goal, walls, current_rows, current_cols)
+    current_step = 0  # Track current position in the path/visited order
+    use_dfs = len(visited_order) > 0  # Use DFS if it returns results, otherwise fall back to random
+
     while running:
         clock.tick(10)  # frames per second
 
@@ -149,6 +154,7 @@ def main():
                         finished = False
                         agent_pos = START
                         visited = set()
+                        current_step = 0
                         start_time = time.time()
                         elapsed_time = 0
                         steps = 0
@@ -169,6 +175,9 @@ def main():
                     current_rows, current_cols = MAZE_SIZES[current_maze]
                     current_goal = (current_cols - 1, current_rows - 1)
                     walls = generate_walls(MAZE_SEEDS[current_maze], MAZE_DENSITIES[current_maze], current_rows, current_cols)
+                    path, visited_order = dfs(START, current_goal, walls, current_rows, current_cols)
+                    use_dfs = len(visited_order) > 0
+                    current_step = 0
                     start_time = 0
                     elapsed_time = 0
                     steps = 0
@@ -182,6 +191,9 @@ def main():
                     current_rows, current_cols = MAZE_SIZES[current_maze]
                     current_goal = (current_cols - 1, current_rows - 1)
                     walls = generate_walls(MAZE_SEEDS[current_maze], MAZE_DENSITIES[current_maze], current_rows, current_cols)
+                    path, visited_order = dfs(START, current_goal, walls, current_rows, current_cols)
+                    use_dfs = len(visited_order) > 0
+                    current_step = 0
                     start_time = 0
                     elapsed_time = 0
                     steps = 0
@@ -195,6 +207,9 @@ def main():
                     current_rows, current_cols = MAZE_SIZES[current_maze]
                     current_goal = (current_cols - 1, current_rows - 1)
                     walls = generate_walls(MAZE_SEEDS[current_maze], MAZE_DENSITIES[current_maze], current_rows, current_cols)
+                    path, visited_order = dfs(START, current_goal, walls, current_rows, current_cols)
+                    use_dfs = len(visited_order) > 0
+                    current_step = 0
                     start_time = 0
                     elapsed_time = 0
                     steps = 0
@@ -203,16 +218,35 @@ def main():
                     paused = False
 
         if started and not paused and not finished:
-            next_pos = random_move(agent_pos, walls, current_rows, current_cols)
-            visited.add(agent_pos)
-            if next_pos != agent_pos:  # Only count as a step if agent moved
-                steps += 1
-            agent_pos = next_pos
+            if use_dfs:
+                # Use DFS visited order to animate the search
+                if current_step < len(visited_order):
+                    agent_pos = visited_order[current_step]
+                    visited.add(agent_pos)
+                    steps += 1
+                    current_step += 1
 
-            if agent_pos == current_goal:
-                finished = True
-                # Store final elapsed time
-                elapsed_time += time.time() - start_time
+                    if agent_pos == current_goal:
+                        finished = True
+                        # Store final elapsed time
+                        elapsed_time += time.time() - start_time
+                else:
+                    # If we've gone through all visited positions but haven't reached goal
+                    # (shouldn't happen if DFS found a path)
+                    finished = True
+                    elapsed_time += time.time() - start_time
+            else:
+                # Fall back to random movement if DFS not implemented
+                next_pos = random_move(agent_pos, walls, current_rows, current_cols)
+                visited.add(agent_pos)
+                if next_pos != agent_pos:  # Only count as a step if agent moved
+                    steps += 1
+                agent_pos = next_pos
+
+                if agent_pos == current_goal:
+                    finished = True
+                    # Store final elapsed time
+                    elapsed_time += time.time() - start_time
 
         # --- Draw ---
         screen.fill(WHITE)
