@@ -1,5 +1,12 @@
 = Week 3 Lab Plan: Depth-First Search (DFS) Pathfinding
 
+#figure(
+  image("week3_gui.png", width: 60%),
+  caption: [
+    GUI for DFS Lab
+  ],
+)
+
 == Overview
 This lab session focuses on implementing Depth-First Search (DFS) algorithm for maze navigation. Students will work with a Pygame-based visualization tool to understand how DFS explores a maze and compares to random movement strategies. This lab bridges the gap between theoretical search algorithms and practical implementation.
 
@@ -52,7 +59,7 @@ conda activate aima-python
 
 == Lab Activities
 
-=== 1. Understanding the Scaffold (15 minutes)
+=== 1. Understanding the Scaffold
 
 ==== Run the Initial Program
 ```bash
@@ -89,9 +96,8 @@ Students should familiarize themselves with:
 - Start the simulation and watch the agent move randomly
 - Note how inefficient random movement is for reaching the goal
 - Try different difficulty levels
-- *Question*: Why does random movement struggle in harder mazes?
 
-=== 2. Understanding the Code Structure (20 minutes)
+=== 2. Understanding the Code Structure
 
 The code is now organized into two files:
 
@@ -184,32 +190,6 @@ def dfs(start, goal, walls, rows, cols):
 + Use `get_neighbors()` to find valid neighboring cells
 + Return both the solution path and the order cells were visited
 
-*Implementation Hints*:
-```python
-# Pseudocode structure:
-stack = [(start, [start])]  # (current_position, path_to_here)
-visited = set()
-visited_order = []
-
-while stack is not empty:
-    current, path = stack.pop()
-
-    if current already visited:
-        continue
-
-    mark current as visited
-    add current to visited_order
-
-    if current == goal:
-        return (path, visited_order)
-
-    for each neighbor of current:
-        if neighbor not visited:
-            add (neighbor, path + [neighbor]) to stack
-
-return ([], visited_order)  # No path found
-```
-
 *What to modify*:
 - Only edit `maze_search_week3.py`
 - Implement the `dfs()` function
@@ -219,27 +199,13 @@ return ([], visited_order)  # No path found
 - Don't modify `dfs_lab_week3.py`
 - Don't change `get_neighbors()` or `random_move()` (yet)
 
-=== 4. Testing and Comparison (20 minutes)
+=== 4. Testing and Comparison
 
 ==== Test Your Implementation
 + Run your DFS implementation on the Easy maze
 + Observe the search pattern - does it explore depth-first?
 + Check if it successfully reaches the goal
 + Test on Medium and Hard mazes
-
-==== Performance Analysis
-Compare DFS vs Random Movement:
-
-#figure(
-  table(
-    columns: 3,
-    [*Metric*], [*Random Movement*], [*DFS*],
-    [Steps to goal], [?], [?],
-    [Time to goal], [?], [?],
-    [Cells explored], [?], [?],
-    [Success rate], [?], [?],
-  )
-)
 
 *Questions for Discussion*:
 + Does DFS always find a path if one exists?
@@ -249,41 +215,11 @@ Compare DFS vs Random Movement:
 
 === 5. Extensions (Optional Challenge Activities)
 
-==== Challenge 1: Path Visualization
-Modify the code to highlight the actual path taken (not just visited cells):
-- Store the path from start to goal
-- Draw the path in a different color (e.g., GREEN)
-
-```python
-# Add to drawing section:
-for pos in path:
-    draw_cell(pos, GREEN)
-```
-
-==== Challenge 2: Backtracking Visualization
-Show when DFS backtracks:
-- Use different colors for active exploration vs backtracking
-- Add a counter for backtrack operations
-
-==== Challenge 3: Compare with BFS
+==== Challenge: Compare with BFS
 Implement Breadth-First Search (BFS) as well:
 - Use a queue instead of a stack
 - Compare path length and exploration patterns
 - Which finds shorter paths?
-
-==== Challenge 4: Add Diagonal Movement
-Modify `get_neighbors()` to include diagonal moves:
-```python
-moves = [(1, 0), (-1, 0), (0, 1), (0, -1),
-         (1, 1), (1, -1), (-1, 1), (-1, -1)]
-```
-How does this affect DFS performance?
-
-==== Challenge 5: Interactive Maze Editor
-Add mouse click functionality to:
-- Add/remove walls by clicking
-- Change start/goal positions
-- Create custom maze challenges
 
 == Common Issues and Debugging
 
@@ -296,16 +232,6 @@ Add mouse click functionality to:
 *Problem*: Recursion depth exceeded (if using recursive DFS)
 
 *Solution*: Use iterative DFS with explicit stack instead
-
-=== Issue 3: Wrong Path
-*Problem*: Agent doesn't reach the goal or takes invalid moves
-
-*Solution*: Verify `get_neighbors()` is filtering walls correctly
-
-=== Issue 4: Performance Issues
-*Problem*: Simulation runs too slow or fast
-
-*Solution*: Adjust `clock.tick(10)` value (line 132) - higher = faster
 
 == Deliverables
 
@@ -321,18 +247,3 @@ Students should be able to demonstrate:
 - Pygame documentation: #link("https://www.pygame.org/docs/")[pygame.org]
 - Visualization of DFS: #link("https://visualgo.net/en/dfsbfs")[visualgo.net/en/dfsbfs]
 - Python data structures (stack/queue): #link("https://docs.python.org/3/tutorial/datastructures.html")[docs.python.org]
-
-== Lab Submission (If Applicable)
-
-If your instructor requires submission:
-+ Submit your modified `maze_search_week3.py` file with completed `dfs()` function
-+ Include a brief report (1-2 paragraphs) comparing DFS to random movement
-+ Screenshot of successful completion on Hard difficulty
-+ Answer to discussion questions from section 4
-
-== Next Week Preview
-
-Week 4 will build on this lab by exploring:
-- Informed search strategies (A\*, Greedy Best-First)
-- Heuristic functions for pathfinding
-- Comparison of uninformed vs informed search
